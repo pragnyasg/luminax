@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypustype="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>robot_bringup</name>
+  <version>0.1.0</version>
+  <description>Master full system bringup package for Baymax Healthcare Robot</description>
+
+  <maintainer email="student@university.edu">Team Baymax</maintainer>
+  <license>Apache-2.0</license>
+
+  <depend>rclpy</depend>
+  <depend>launch_ros</depend>
+  <depend>robot_description</depend>
+  <depend>robot_hardware</depend>
+  <depend>robot_navigation</depend>
+  <depend>robot_perception</depend>
+  <depend>robot_voice</depend>
+  <depend>robot_health</depend>
+  <depend>robot_behaviour</depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

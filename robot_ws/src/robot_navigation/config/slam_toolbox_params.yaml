@@ -1,0 +1,41 @@
+slam_toolbox:
+  ros__parameters:
+    # Solver settings
+    solver_plugin: solver_plugins::CsparserSolver
+    ceres_linear_solver: SPARSE_NORMAL_CHOLESKY
+    ceres_preconditioner: SCHUR_JACOBI
+    ceres_trust_strategy: LEVENBERG_MARQUARDT
+    ceres_loss_function: None
+
+    # Frame conventions (REP-105)
+    odom_frame: odom
+    map_frame: map
+    base_frame: base_footprint
+    scan_topic: /scan
+
+    # Operating mode
+    mode: mapping
+
+    # Map grid resolution and scan range limits
+    resolution: 0.05                    # 5 cm per cell grid size
+    max_laser_range: 10.0               # Max laser range (meters)
+    minimum_time_interval: 0.5
+    transform_timeout: 0.2
+    tf_buffer_duration: 30.0
+    stack_size_to_use: 40000000
+
+    # Scan matching & loop closure parameters
+    use_scan_matching: true
+    use_scan_barycenter: true
+    minimum_travel_distance: 0.1         # Update map every 10 cm movement
+    minimum_travel_heading: 0.1          # Update map every 0.1 rad rotation
+    scan_buffer_size: 10
+    scan_buffer_maximum_scan_distance: 10.0
+    link_match_minimum_response_fine: 0.1
+    link_scan_maximum_distance: 1.5
+    loop_search_maximum_distance: 3.0
+    do_loop_closing: true
+    loop_match_minimum_chain_size: 10
+    loop_match_maximum_variance_coarse: 3.0
+    loop_match_minimum_response_coarse: 0.35
+    loop_match_minimum_response_fine: 0.45

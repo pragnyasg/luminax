@@ -1,0 +1,39 @@
+# ROS 2 Build & Installation Artifacts
+robot_ws/build/
+robot_ws/install/
+robot_ws/log/
+*.build/
+*.install/
+*.log/
+
+# Python Compiled Files & Environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+
+# C++ Compiled Files
+*.o
+*.obj
+*.elf
+*.bin
+
+# IDE & Editor Settings
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ESP32 Build Folders
+esp32_firmware/.pio/
+esp32_firmware/build/
+
+# User Local Overrides
+*.user

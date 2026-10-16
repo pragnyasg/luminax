@@ -1,52 +1,28 @@
-# Baymax-Inspired Autonomous Healthcare Companion Robot
+# LUMI — AI Autonomous Healthcare Companion Robot
 
-A modular, educational, and clean ROS 2 software repository for an Autonomous Mobile Robot (AMR) designed as an indoor healthcare companion.
+A modular, academically rigorous, fully tested ROS 2 software repository for an Autonomous Mobile Robot (AMR) designed as an indoor healthcare companion.
 
 ---
 
 ## Executive Summary
 
-The **Baymax Healthcare Robot** is a university educational robotics project designed for **Ubuntu 22.04 LTS** running **ROS 2 Humble Hawksbill**. 
+**LUMI** is an indoor Autonomous Mobile Robot (AMR) developed for **Ubuntu 22.04 LTS** running **ROS 2 Humble Hawksbill**. 
 
-### Primary Technical Focus
-The single most important technical objective of this project is **Reliable Autonomous Indoor Navigation**. 
+### Primary Technical Objective
+The primary contribution of this project is the integration of **ROS 2 mobile robotics, 2D SLAM mapping, Nav2 autonomous navigation, perception, and embedded motor control** into a coherent, maintainable, and testable system.
 
-### Critical Design Decision
+### Critical Design Target & Exclusions
 > [!IMPORTANT]
-> **THIS ROBOT DOES NOT HAVE ARMS.**
-> It is an Autonomous Mobile Robot (AMR) built on a differential drive base. It prioritizes robust mobility, LiDAR sensing, obstacle avoidance, SLAM mapping, and interactive companion behaviors over complex robotic manipulation.
+> **LUMI DOES NOT HAVE A ROBOTIC ARM.**
+> LUMI is an Autonomous Mobile Robot built on a differential-drive base (2 driven wheels + 1 balancing rear caster wheel). It prioritizes robust mobility, LiDAR sensing, obstacle avoidance, SLAM mapping, companion voice interaction, and scheduled medication reminders with emergency escalations over robotic manipulation.
 
 ---
 
-## Implementation Status
+## System Hardware Architecture Contract
 
-| Feature / Phase | Status | Package / Location | Notes |
-| :--- | :--- | :--- | :--- |
-| **Project Architecture & Docs** | `IMPLEMENTED NOW` | `documentation/` | Complete architectural guides & student study notes |
-| **ROS 2 Colcon Workspace** | `IMPLEMENTED NOW` | `robot_ws/` | Standard ROS 2 Humble workspace layout |
-| **URDF / Xacro Robot Model** | `IMPLEMENTED NOW` | `robot_ws/src/robot_description/urdf/` | Parametric 3D chassis, wheels, sensors, inertias |
-| **RViz 3D Visualization** | `IMPLEMENTED NOW` | `robot_ws/src/robot_description/rviz/` | Pre-configured RViz display setup |
-| **Robot Display Launch File** | `IMPLEMENTED NOW` | `robot_ws/src/robot_description/launch/` | ROS 2 launch file loading transforms & GUI |
-| **Gazebo Simulation (Phase 4)** | `IMPLEMENTED NOW` | `simulation/` | Gazebo Classic 11 world & master launch setup |
-| **Diff-Drive Plugins (Phase 4)** | `IMPLEMENTED NOW` | `robot_ws/src/robot_description/urdf/` | Gazebo plugins for `/cmd_vel`, `/scan`, `/camera/image_raw` |
-| **Hardware Bridge Node (Phase 5)** | `IMPLEMENTED NOW` | `robot_ws/src/robot_hardware/` | `serial_bridge_node.py` translating `/cmd_vel` & `/odom` |
-| **ESP32 Microcontroller Firmware** | `IMPLEMENTED NOW` | `esp32_firmware/` | C++ PWM motor control, optical encoders, JSON serial |
-| **LiDAR Sensing (`/scan`) (Phase 6)** | `IMPLEMENTED NOW` | `robot_ws/src/robot_navigation/` | 2D LiDAR ray sensor & scan topic setup |
-| **SLAM Mapping (Phase 7–8)** | `IMPLEMENTED NOW` | `robot_ws/src/robot_navigation/` | `slam_toolbox` mapping & map saver setup |
-| **Nav2 Autonomous Navigation (Phase 9)** | `IMPLEMENTED NOW` | `robot_ws/src/robot_navigation/` | AMCL, DWB local planner, NavFn global planner |
-| **Person Detection AI (Phases 10–11)** | `IMPLEMENTED NOW` | `robot_ws/src/robot_perception/` | OpenCV `person_detector_node` |
-| **Voice Interaction (Phase 14)** | `IMPLEMENTED NOW` | `robot_ws/src/robot_voice/` | Offline TTS `voice_node` |
-| **Healthcare Reminders (Phases 15–16)** | `IMPLEMENTED NOW` | `robot_ws/src/robot_health/` | `reminder_manager_node` medicine alerts |
-| **Behavior Manager FSM (Phase 17)** | `IMPLEMENTED NOW` | `robot_ws/src/robot_behaviour/` | Finite State Machine companion manager |
-| **Master System Bringup** | `IMPLEMENTED NOW` | `robot_ws/src/robot_bringup/` | `bringup_full_system.launch.py` master launch |
-
----
-
-## Hardware Architecture
-
-```
+```text
                   +-----------------------------------+
-                  |  BAYMAX COMPANION ROBOT (AMR)     |
+                  |   LUMI COMPANION ROBOT (AMR)      |
                   +-----------------------------------+
                                     |
             +-----------------------+-----------------------+
@@ -54,86 +30,151 @@ The single most important technical objective of this project is **Reliable Auto
             v                                               v
    +------------------+                            +------------------+
    |  Raspberry Pi 5  |                            |      ESP32       |
-   | (Main Compute)   |                            | (Microcontroller)|
+   | (High-Level OS)  |                            | (Microcontroller)|
    +------------------+                            +------------------+
             |                                               |
      +------+------+                                 +------+------+
      |      |      |                                 |      |      |
      v      v      v                                 v      v      v
-   ROS 2  LiDAR  Camera                            Motors Encoders Battery
+   ROS 2  LiDAR  Camera                            L298N  Encoders Battery
+  Humble RPLiDAR  USB                               Motors  334 CPR  Divider
 ```
 
-- **Raspberry Pi 5**: High-level computation (ROS 2 Humble, SLAM, Nav2, Perception, Logic).
-- **ESP32 Microcontroller**: Low-level execution (PWM motor control, encoder tick count, battery monitoring).
-- **Differential Drive Chassis**: 2 driven wheels + 1 balancing rear caster wheel.
-- **Sensors**: 2D LiDAR, RGB Camera, Optical Wheel Encoders.
+- **Main Computer:** Raspberry Pi 5 (8GB) running Ubuntu 22.04 LTS & ROS 2 Humble.
+- **Motor Controller:** ESP32-WROOM-32 microcontroller executing hard real-time 20 kHz LEDC PWM and optical encoder interrupt service routines.
+- **Motor Driver:** Dual-channel L298N H-bridge motor driver.
+- **Motors & Chassis:** Two 12V geared DC motors in differential-drive configuration (wheel radius $r = 0.04\,\text{m}$, track width $L = 0.32\,\text{m}$) plus 1 passive low-friction rear caster ball.
+- **Sensors:** 2D Planar LiDAR (`/scan`), USB RGB Webcam (`/camera/image_raw`), dual optical quadrature wheel encoders, and 12V Li-ion battery voltage sensing.
+- **Audio Peripherals:** USB speaker for offline text-to-speech companion prompts (`/voice/speak`) and USB microphone (`/voice/command`).
 
 ---
 
-## Directory Structure
+## Repository Structure & ROS 2 Packages
 
 ```text
-baymax_healthcare_robot/
-├── README.md                          # Main project guide (this file)
-├── .gitignore                         # ROS 2, Python, and OS ignore rules
-├── LICENSE                            # Apache 2.0 open-source license
-├── documentation/                     # Educational documentation for team & exams
-│   ├── project_overview.md            # Vision, scope, and AMR concepts
-│   ├── hardware_architecture.md       # RPi 5 + ESP32 pinouts and specs
-│   ├── software_architecture.md       # Layered software architecture
-│   ├── ros2_architecture.md           # ROS 2 node graph, topics, TF tree
-│   ├── development_roadmap.md         # 20-Phase progressive roadmap
-│   └── future_features.md             # Blueprints for AI & Voice modules
-├── robot_ws/                          # ROS 2 Colcon Workspace
+luminax/
+├── README.md                                           # Master guide (this file)
+├── .gitignore                                          # Version control rules
+├── LICENSE                                             # Apache 2.0 open-source license
+├── docs/                                               # Complete academic defense documentation
+│   └── viva/
+│       ├── 00_PROJECT_OVERVIEW.md                     # Comprehensive academic overview & architecture
+│       ├── 01_DIRECTORY_AND_FILE_GUIDE.md             # File-by-file inventory
+│       ├── 02_ROS2_NODE_TOPIC_SERVICE_ACTION_MAP.md   # Complete communication interface contract
+│       ├── 03_SOURCE_CODE_LINE_BY_LINE.md             # Line-by-line source walkthrough & viva Q&A
+│       ├── 04_ROBOT_HARDWARE_TO_SOFTWARE_MAPPING.md   # Physical hardware mapped to software drivers
+│       ├── 05_SLAM_NAV2_GAZEBO_RVIZ_WORKFLOW.md       # Step-by-step simulation & navigation workflow
+│       ├── 06_BUILD_RUN_AND_DEBUG_GUIDE.md            # Exact Ubuntu commands for building & running
+│       ├── 07_VIVA_QUESTION_BANK.md                   # 55 faculty questions and model answers
+│       ├── 08_IMPLEMENTED_VS_PLANNED.md               # Honest engineering matrix of implemented features
+│       ├── 09_UBUNTU_MIGRATION_AND_TROUBLESHOOTING.md # Migration pitfalls, diagnostics, and remedies
+│       └── 10_FINAL_VIVA_CHEAT_SHEET.md               # Last-minute oral defense quick reference
+├── esp32_firmware/                                     # Low-level embedded motor & encoder C++ firmware
+│   ├── platformio.ini                                  # PlatformIO build configuration
 │   └── src/
-│       ├── robot_description/         # URDF/Xacro model, RViz & Gazebo plugins
-│       ├── robot_hardware/            # RPi 5 to ESP32 serial bridge & odometry
-│       ├── robot_navigation/          # SLAM Toolbox & Nav2 parameters/launch
-│       ├── robot_bringup/             # Master system bringup launch file
-│       ├── robot_perception/          # OpenCV person detection node
-│       ├── robot_behaviour/           # Finite State Machine behavior manager
-│       ├── robot_health/              # Healthcare reminder manager node
-│       └── robot_voice/               # Voice synthesis (TTS) & command node
-├── esp32_firmware/                    # ESP32 motor & encoder C++ firmware
-├── simulation/                        # Gazebo Classic 11 room world & launch
-└── scripts/                           # Helper Linux setup scripts
+│       └── main.cpp                                    # 20kHz PWM, ISR encoder tracking, watchdog
+├── robot_ws/                                           # ROS 2 Colcon Workspace
+│   └── src/
+│       ├── robot_description/                          # Parametric URDF/Xacro model & RViz configs
+│       ├── robot_simulation/                           # Gazebo Classic 11 world & spawn launch
+│       ├── robot_hardware/                             # Serial bridge to ESP32 & wheel odometry node
+│       ├── robot_navigation/                           # SLAM Toolbox & Nav2 parameters/launch/maps
+│       ├── robot_perception/                           # OpenCV HOG person detection & webcam publisher
+│       ├── robot_voice/                                # Async offline text-to-speech engine
+│       ├── robot_health/                               # Healthcare medication reminder manager
+│       ├── robot_behaviour/                            # 5-state supervisor Finite State Machine
+│       └── robot_bringup/                              # Master system bringup launch files
+├── scripts/                                            # Verification shell scripts
+│   └── check_env.sh                                    # Automated environment verification script
+├── simulation/                                         # Standalone simulation assets
+│   ├── launch/gazebo_sim.launch.py
+│   └── worlds/healthcare_room.world
+└── tests/                                              # Automated unit test suite (21 Tests, 100% Pass)
+    ├── test_behaviour_fsm.py                           # FSM state transitions & emergency stops
+    ├── test_healthcare_reminder.py                     # Reminder interval & escalation logic
+    ├── test_kinematics_and_odometry.py                 # Forward/inverse kinematics & quaternions
+    ├── test_ros_packages_and_xml.py                    # XML validity, URDF, YAML, and Python compilation
+    └── test_serial_protocol.py                         # JSON packet formatting & battery ADC tests
 ```
 
 ---
 
-## Build & Run Instructions (Ubuntu 22.04 + ROS 2 Humble)
+## Build & Execution Instructions (Ubuntu 22.04 LTS + ROS 2 Humble)
 
-### 1. Build the ROS 2 Workspace
+### 1. Install System Dependencies
 ```bash
-# Navigate to the workspace
-cd baymax_healthcare_robot/robot_ws
+sudo apt update && sudo apt install -y \
+    ros-humble-desktop \
+    ros-humble-gazebo-ros-pkgs \
+    ros-humble-gazebo-plugins \
+    ros-humble-robot-state-publisher \
+    ros-humble-joint-state-publisher-gui \
+    ros-humble-xacro \
+    ros-humble-rviz2 \
+    ros-humble-slam-toolbox \
+    ros-humble-nav2-bringup \
+    ros-humble-nav2-map-server \
+    ros-humble-cv-bridge \
+    python3-colcon-common-extensions \
+    python3-pip \
+    espeak
 
-# Source ROS 2 Humble environment
+pip3 install pyserial pyttsx3 opencv-python numpy
+```
+
+### 2. Build the Colcon Workspace
+```bash
+cd ~/luminax/robot_ws
+
+# Source ROS 2 Humble
 source /opt/ros/humble/setup.bash
 
-# Build all packages using colcon
+# Build all 9 packages
 colcon build --symlink-install
 
-# Source the newly built overlay
+# Source the workspace overlay
 source install/setup.bash
 ```
 
-### 2. Launch Entire Baymax Companion Robot System!
+### 3. Run Automated Validation Test Suite
 ```bash
-ros2 launch robot_bringup bringup_full_system.launch.py
+cd ~/luminax
+python3 -m unittest discover -s tests -p "test_*.py" -v
+# Verified Result: 21 tests ran, 0 failures, status OK.
 ```
 
-### 3. Individual Component Launches (Optional)
-- **Gazebo Sim + SLAM Only**: `ros2 launch robot_navigation full_navigation.launch.py`
-- **Nav2 Autonomous Navigation**: `ros2 launch robot_navigation navigation.launch.py`
-- **Hardware Bridge Node**: `ros2 run robot_hardware serial_bridge_node`
-- **Person Detector Node**: `ros2 run robot_perception person_detector_node`
-- **Voice Node**: `ros2 run robot_voice voice_node`
-- **Reminder Manager Node**: `ros2 run robot_health reminder_manager_node`
-- **Behavior FSM Node**: `ros2 run robot_behaviour behaviour_manager_node`
+### 4. Master Full System Bringup Commands
+#### Mode A: Full Simulation (Gazebo Classic 11 + SLAM + Nav2 + Perception + Voice + FSM + RViz2)
+```bash
+ros2 launch robot_bringup bringup_full_system.launch.py use_sim:=true
+```
+
+#### Mode B: Physical Robot Bringup (Raspberry Pi 5 + ESP32 Hardware)
+```bash
+ros2 launch robot_bringup bringup_full_system.launch.py \
+    use_sim:=false \
+    use_sim_time:=false
+```
+
+---
+
+## Viva & Examination Documentation Index
+
+For students preparing for oral examination and project reviews, see the dedicated study guides in `docs/viva/`:
+- **[00_PROJECT_OVERVIEW.md](docs/viva/00_PROJECT_OVERVIEW.md)**: Academic scope, problem statement, and Mermaid architecture diagram.
+- **[01_DIRECTORY_AND_FILE_GUIDE.md](docs/viva/01_DIRECTORY_AND_FILE_GUIDE.md)**: File-by-file roadmap and responsibilities.
+- **[02_ROS2_NODE_TOPIC_SERVICE_ACTION_MAP.md](docs/viva/02_ROS2_NODE_TOPIC_SERVICE_ACTION_MAP.md)**: Complete communication interface matrix and TF tree.
+- **[03_SOURCE_CODE_LINE_BY_LINE.md](docs/viva/03_SOURCE_CODE_LINE_BY_LINE.md)**: Mandatory line-by-line source code walkthrough and examiner Q&A.
+- **[04_ROBOT_HARDWARE_TO_SOFTWARE_MAPPING.md](docs/viva/04_ROBOT_HARDWARE_TO_SOFTWARE_MAPPING.md)**: Electronic circuits, L298N pinouts, and physical data flows.
+- **[05_SLAM_NAV2_GAZEBO_RVIZ_WORKFLOW.md](docs/viva/05_SLAM_NAV2_GAZEBO_RVIZ_WORKFLOW.md)**: Mapping, map saving, AMCL, and goal navigation guide.
+- **[06_BUILD_RUN_AND_DEBUG_GUIDE.md](docs/viva/06_BUILD_RUN_AND_DEBUG_GUIDE.md)**: Full terminal command reference and troubleshooting tools.
+- **[07_VIVA_QUESTION_BANK.md](docs/viva/07_VIVA_QUESTION_BANK.md)**: 55 comprehensive viva questions and model answers.
+- **[08_IMPLEMENTED_VS_PLANNED.md](docs/viva/08_IMPLEMENTED_VS_PLANNED.md)**: Honest engineering matrix of verified vs. planned features.
+- **[09_UBUNTU_MIGRATION_AND_TROUBLESHOOTING.md](docs/viva/09_UBUNTU_MIGRATION_AND_TROUBLESHOOTING.md)**: Real-world Ubuntu migration remedies.
+- **[10_FINAL_VIVA_CHEAT_SHEET.md](docs/viva/10_FINAL_VIVA_CHEAT_SHEET.md)**: 10-minute rapid review sheet and formulas.
 
 ---
 
 ## License
 
-This project is released under the [Apache 2.0 License](LICENSE).
+This project is licensed under the [Apache 2.0 License](LICENSE).

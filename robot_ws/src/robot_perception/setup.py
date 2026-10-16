@@ -14,14 +14,15 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='Team Baymax',
+    maintainer='Team LUMI',
     maintainer_email='student@university.edu',
-    description='Camera perception and person detection node for Baymax Healthcare Robot',
+    description='Camera perception and person detection package for LUMI Healthcare Robot',
     license='Apache-2.0',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
             'person_detector_node = robot_perception.person_detector_node:main',
+            'webcam_publisher_node = robot_perception.webcam_publisher_node:main',
         ],
     },
 )

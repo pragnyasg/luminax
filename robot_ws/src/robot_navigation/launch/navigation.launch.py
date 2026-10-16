@@ -29,6 +29,18 @@ def generate_launch_description():
         description='Full path to map YAML file'
     )
 
+    use_sim_time_arg = DeclareLaunchArgument(
+        'use_sim_time',
+        default_value='true',
+        description='Use simulation (Gazebo) clock if true'
+    )
+
+    autostart_arg = DeclareLaunchArgument(
+        'autostart',
+        default_value='true',
+        description='Automatically startup the Nav2 lifecycle stack'
+    )
+
     nav2_bringup_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(pkg_nav2_bringup, 'launch', 'bringup_launch.py')
@@ -36,13 +48,15 @@ def generate_launch_description():
         launch_arguments={
             'map': LaunchConfiguration('map'),
             'params_file': LaunchConfiguration('params_file'),
-            'use_sim_time': 'true',
-            'autostart': 'true'
+            'use_sim_time': LaunchConfiguration('use_sim_time'),
+            'autostart': LaunchConfiguration('autostart')
         }.items()
     )
 
     return LaunchDescription([
         params_file_arg,
         map_file_arg,
+        use_sim_time_arg,
+        autostart_arg,
         nav2_bringup_launch
     ])

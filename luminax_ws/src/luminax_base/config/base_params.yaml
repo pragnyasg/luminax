@@ -1,0 +1,56 @@
+# =====================================================================
+#  LUMINAX motor_driver_node parameters
+#  Load with:  ros2 run luminax_base motor_driver_node \
+#                  --ros-args --params-file base_params.yaml
+#  (the base.launch.py does this for you)
+#
+#  >>> CONFIRM EVERY PIN AND EVERY (MEASURE) VALUE BEFORE POWERING MOTORS
+# =====================================================================
+motor_driver_node:
+  ros__parameters:
+
+    # Set false to test kinematics on a laptop with no GPIO (logs only).
+    use_hardware: true
+
+    # 'dual_pwm' for BTS7960 (2 PWM pins per motor)
+    # 'pwm_dir'  for Cytron MDD10A / TB6612 (1 PWM + 1 DIR pin per motor)
+    driver_mode: "dual_pwm"
+
+    # --- Geometry (MEASURE on the built robot) ---
+    wheel_radius: 0.045        # m   (MEASURE)
+    wheel_separation: 0.375    # m   (MEASURE) wheel-to-wheel contact distance
+
+    # --- Speed limits ---
+    max_linear_speed: 0.5      # m/s
+    max_angular_speed: 0.5     # rad/s  (keep ~0.5 so rf2o odom tracks rotation)
+
+    # Wheel linear speed at 100% PWM duty. TUNE by experiment:
+    #   drive forward at duty ~1.0, measure real speed, put it here.
+    max_wheel_speed: 0.6       # m/s
+    min_duty: 0.0              # set e.g. 0.12 if motors stall at low duty
+
+    # --- Safety ---
+    cmd_vel_timeout: 0.5       # s  (stop if no command within this window)
+    control_rate: 20.0         # Hz
+
+    # --- Direction correction (flip if a wheel turns the wrong way) ---
+    invert_left: false
+    invert_right: false
+
+    # --- PWM ---
+    pwm_frequency: 1000        # Hz
+
+    # --- GPIO pins (BCM numbering). CONFIRM AGAINST YOUR WIRING. ---
+    # dual_pwm (BTS7960):
+    left_rpwm_pin: 12
+    left_lpwm_pin: 13
+    right_rpwm_pin: 18
+    right_lpwm_pin: 19
+    left_en_pin: -1            # -1 = unused (tie R_EN & L_EN to 3V3 in hardware)
+    right_en_pin: -1
+
+    # pwm_dir (Cytron MDD10A) -- used only when driver_mode: "pwm_dir":
+    left_pwm_pin: 12
+    left_dir_pin: 5
+    right_pwm_pin: 18
+    right_dir_pin: 6

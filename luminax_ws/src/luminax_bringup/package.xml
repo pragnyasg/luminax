@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>luminax_bringup</name>
+  <version>0.1.0</version>
+  <description>Top-level launch files and configuration (LiDAR, rf2o odometry, SLAM, Nav2) for the LUMINAX robot.</description>
+  <maintainer email="you@example.com">LUMINAX Team</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>luminax_description</exec_depend>
+  <exec_depend>luminax_base</exec_depend>
+
+  <!-- Binary (apt) dependencies for Jazzy -->
+  <exec_depend>slam_toolbox</exec_depend>
+  <exec_depend>navigation2</exec_depend>
+  <exec_depend>nav2_bringup</exec_depend>
+  <exec_depend>nav2_map_server</exec_depend>
+  <exec_depend>teleop_twist_keyboard</exec_depend>
+  <exec_depend>tf2_tools</exec_depend>
+
+  <!-- Source (git) dependencies; see README "Third-party source packages":
+       sllidar_ros2, rf2o_laser_odometry -->
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

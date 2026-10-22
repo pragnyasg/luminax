@@ -1,0 +1,20 @@
+# =====================================================================
+#  rf2o_laser_odometry parameters
+#  Produces odom from LiDAR scans alone (no wheel encoders needed).
+#  It publishes the odom -> base_footprint TF.
+#
+#  Known limits of laser-only odometry:
+#   * Drifts during fast pure rotation -> we cap angular vel at ~0.5 rad/s.
+#   * Degrades in long featureless corridors / open halls.
+#   * Add a wheel-encoder or IMU + robot_localization later for robustness.
+# =====================================================================
+rf2o_laser_odometry:
+  ros__parameters:
+    laser_scan_topic: "/scan"
+    odom_topic: "/odom"
+    publish_tf: true               # generate odom -> base_footprint
+    base_frame_id: "base_footprint"
+    odom_frame_id: "odom"
+    init_pose_from_topic: ""        # MUST stay empty or the node hangs
+    freq: 10.0                      # Hz; match or stay below LiDAR scan rate
+    verbose: false

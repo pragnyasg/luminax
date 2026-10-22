@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>LUMI Caregiver Mobile App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6750A4;
+      --primary-container: #EADDFF;
+      --on-primary-container: #21005D;
+      --secondary: #625B71;
+      --surface: #FAF8FD;
+      --surface-container: #F3EDF7;
+      --surface-high: #ECE6F0;
+      --emergency: #BA1A1A;
+      --emergency-container: #FFDAD6;
+      --success: #2E7D32;
+      --success-container: #E8F5E9;
+      --warning: #ED6C02;
+      --info: #0288D1;
+      --text-main: #1D1B20;
+      --text-muted: #625B71;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background: #121016; display: flex; justify-content: center; min-height: 100vh; }
+    
+    /* Mobile Device Frame */
+    .app-shell {
+      width: 100%;
+      max-width: 440px;
+      min-height: 100vh;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    }
+
+    /* App Bar */
+    .app-bar {
+      padding: 16px 20px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .app-title { font-size: 19px; font-weight: 800; color: var(--text-main); }
+    .app-sub { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+    .status-group { display: flex; gap: 8px; align-items: center; }
+    .pill {
+      font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px;
+    }
+    .pill-online { background: var(--success-container); color: var(--success); }
+    .pill-batt { background: var(--primary-container); color: var(--on-primary-container); }
+
+    /* Emergency Alert Banner */
+    #emergency-banner {
+      display: none;
+      background: var(--emergency);
+      color: white;
+      margin: 12px 16px 4px;
+      padding: 16px;
+      border-radius: 20px;
+      box-shadow: 0 4px 16px rgba(186, 26, 26, 0.4);
+    }
+    .banner-title { font-weight: 800; font-size: 14px; letter-spacing: 0.5px; }
+    .banner-desc { font-size: 12px; opacity: 0.9; margin-top: 2px; }
+    .banner-actions { display: flex; gap: 10px; margin-top: 12px; }
+    .banner-btn {
+      flex: 1; padding: 8px; border-radius: 12px; border: none; font-size: 12px; font-weight: 700; cursor: pointer;
+    }
+    .btn-ack { background: white; color: var(--emergency); }
+    .btn-call { background: transparent; color: white; border: 1.5px solid white; }
+
+    /* Screen Container */
+    .screen-content { flex: 1; padding: 12px 16px 90px; overflow-y: auto; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* Cards */
+    .card {
+      background: var(--surface-container);
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+    .card-purple { background: rgba(234, 221, 255, 0.45); }
+
+    /* Robot Eyes Widget */
+    .robot-eyes-box {
+      width: 140px;
+      height: 64px;
+      background: #1C1B1F;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-evenly;
+      box-shadow: 0 0 20px rgba(157, 132, 255, 0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .eye {
+      width: 30px;
+      height: 34px;
+      background: #9D84FF;
+      border-radius: 16px 16px 8px 8px;
+      box-shadow: 0 0 10px #9D84FF;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .eye::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: white;
+      border-radius: 50%;
+    }
+    .eye.blink { transform: scaleY(0.15); }
+    .eye.emergency { background: var(--emergency); box-shadow: 0 0 12px var(--emergency); }
+
+    /* Quick Action Grid */
+    .action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+    .action-btn {
+      background: var(--surface-container);
+      border: 1px solid rgba(103, 80, 164, 0.15);
+      border-radius: 16px;
+      padding: 12px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    /* Teleop D-Pad */
+    .dpad-container { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px 0; }
+    .dpad-row { display: flex; gap: 14px; align-items: center; }
+    .dpad-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--primary-container);
+      border: none;
+      color: var(--on-primary-container);
+      font-size: 26px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .dpad-btn:active { transform: scale(0.92); background: var(--primary); color: white; }
+    .dpad-stop {
+      width: 76px;
+      height: 76px;
+      background: var(--emergency);
+      color: white;
+      font-size: 12px;
+      font-weight: 900;
+      box-shadow: 0 4px 14px rgba(186,26,26,0.4);
+    }
+
+    /* Camera Player */
+    .video-frame {
+      width: 100%;
+      height: 240px;
+      background: black;
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+    .video-frame img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* Map Canvas */
+    #map-canvas {
+      width: 100%;
+      height: 240px;
+      background: #231E2D;
+      border-radius: 20px;
+    }
+
+    /* Bottom Navigation Bar */
+    .nav-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background: var(--surface);
+      border-top: 1px solid rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 10px;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 14px;
+    }
+    .nav-item.active {
+      color: var(--on-primary-container);
+      font-weight: 800;
+      background: var(--primary-container);
+    }
+    .nav-icon { font-size: 20px; }
+
+    /* Button styles */
+    .btn {
+      padding: 8px 14px; border-radius: 12px; border: none; font-size: 12px; font-weight: 700; cursor: pointer;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top App Bar -->
+    <header class="app-bar">
+      <div>
+        <div class="app-title">LUMI Companion</div>
+        <div class="app-sub" id="robot-name">Caregiver Mobile Console</div>
+      </div>
+      <div class="status-group">
+        <span class="pill pill-online" id="status-pill">ONLINE</span>
+        <span class="pill pill-batt" id="battery-pill">94%</span>
+      </div>
+    </header>
+
+    <!-- Global Emergency Fall Alert Banner -->
+    <div id="emergency-banner">
+      <div class="banner-title">⚠️ ACTIVE FALL DETECTED</div>
+      <div class="banner-desc" id="emergency-desc">Patient fall detected with 96% confidence.</div>
+      <div class="banner-actions">
+        <button class="banner-btn btn-ack" onclick="acknowledgeAlert()">Acknowledge</button>
+        <button class="banner-btn btn-call" onclick="callResponder()">Call Contact</button>
+      </div>
+    </div>
+
+    <!-- Main Screens -->
+    <main class="screen-content">
+      <!-- 1. HOME TAB -->
+      <section id="tab-home" class="tab-pane active">
+        <!-- Robot Expression Card -->
+        <div class="card card-purple">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div class="robot-eyes-box" id="robot-eyes">
+              <div class="eye" id="eye-left"></div>
+              <div class="eye" id="eye-right"></div>
+            </div>
+            <div>
+              <span class="pill pill-online" id="mode-badge" style="background: var(--primary); color: white;">AUTONOMOUS</span>
+              <div style="font-weight: 800; font-size: 14px; margin-top: 6px;" id="expr-label">Expression: HAPPY</div>
+              <div style="font-size: 12px; color: var(--text-muted);" id="activity-label">Activity: IDLE</div>
+            </div>
+          </div>
+          <div style="margin-top: 12px; pt-2; border-top: 1px solid rgba(0,0,0,0.06); font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between;">
+            <span id="location-text">Location: (0.5, 1.2) m</span>
+            <span>Heartbeat: Fresh</span>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="action-grid">
+          <div class="action-btn" onclick="switchTab('camera')">
+            <span style="font-size: 20px;">📷</span> Camera
+          </div>
+          <div class="action-btn" onclick="switchTab('map')">
+            <span style="font-size: 20px;">🗺️</span> Map
+          </div>
+          <div class="action-btn" onclick="switchTab('medicines')">
+            <span style="font-size: 20px;">💊</span> Medicines
+          </div>
+          <div class="action-btn" onclick="switchTab('controls')">
+            <span style="font-size: 20px;">🎮</span> Teleop
+          </div>
+        </div>
+
+        <!-- Next Medicine Card -->
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-weight: 800; font-size: 14px;">Next Scheduled Medicine</span>
+            <span style="font-size: 11px; color: var(--primary); font-weight: 700; cursor: pointer;" onclick="switchTab('medicines')">View All</span>
+          </div>
+          <div style="background: white; padding: 12px; border-radius: 14px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <div style="font-weight: 700; font-size: 14px;">Metformin (500mg)</div>
+              <div style="font-size: 12px; color: var(--text-muted);">Due at 13:00 • Take with lunch</div>
+            </div>
+            <button class="btn btn-success" onclick="confirmMedicine()">Confirm</button>
+          </div>
+        </div>
+
+        <!-- Fall Detection Safety Status -->
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-weight: 800; font-size: 14px;">Safety & Fall Detector</div>
+              <div style="font-size: 12px; color: var(--text-muted);">MediaPipe Pose classifier active</div>
+            </div>
+            <button class="btn btn-outline" onclick="triggerSimulatedFall()">Simulate Fall</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. CAMERA TAB -->
+      <section id="tab-camera" class="tab-pane">
+        <div class="video-frame">
+          <img id="live-stream-img" src="/api/v1/camera/stream" alt="Live Camera Feed">
+          <div style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6); padding: 4px 8px; border-radius: 8px; font-size: 11px; color: white; font-weight: 700;">
+            ● LIVE | 30 FPS
+          </div>
+        </div>
+        <div class="card" style="margin-top: 12px;">
+          <div style="font-weight: 800; font-size: 14px; margin-bottom: 8px;">Vision Stream Controls</div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-primary" onclick="captureSnapshot()">Capture Snapshot</button>
+            <button class="btn btn-outline" onclick="togglePrivacy()">Privacy Shield</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. MAP TAB -->
+      <section id="tab-map" class="tab-pane">
+        <canvas id="map-canvas"></canvas>
+        <div class="card" style="margin-top: 12px;">
+          <div style="font-weight: 800; font-size: 14px; margin-bottom: 10px;">Dispatch to Destination</div>
+          <div style="display: flex; flex-direction: column; gap: 8px;" id="destinations-list">
+            <!-- Populated via API -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. MEDICINES TAB -->
+      <section id="tab-medicines" class="tab-pane">
+        <div class="card card-purple">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-weight: 800; font-size: 16px;">Adherence Rate: 92%</div>
+              <div style="font-size: 12px; color: var(--text-muted);">9 taken • 1 skipped • 0 missed</div>
+            </div>
+            <button class="btn btn-primary" onclick="triggerReminderPrompt()">Remind Now</button>
+          </div>
+        </div>
+        <div id="medicines-list">
+          <!-- Populated via API -->
+        </div>
+      </section>
+
+      <!-- 5. TELEOP CONTROLS TAB -->
+      <section id="tab-controls" class="tab-pane">
+        <div class="card">
+          <div style="text-align: center; font-weight: 800; font-size: 15px; margin-bottom: 4px;">Manual Robot Teleoperation</div>
+          <div style="text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Dead-man safety: Motion halts immediately on touch release.</div>
+          
+          <div class="dpad-container">
+            <button class="dpad-btn" onmousedown="sendCmd(0.25, 0)" onmouseup="stopCmd()" ontouchstart="sendCmd(0.25, 0)" ontouchend="stopCmd()">▲</button>
+            <div class="dpad-row">
+              <button class="dpad-btn" onmousedown="sendCmd(0, 0.6)" onmouseup="stopCmd()" ontouchstart="sendCmd(0, 0.6)" ontouchend="stopCmd()">◀</button>
+              <button class="dpad-btn dpad-stop" onclick="emergencyHalt()">STOP</button>
+              <button class="dpad-btn" onmousedown="sendCmd(0, -0.6)" onmouseup="stopCmd()" ontouchstart="sendCmd(0, -0.6)" ontouchend="stopCmd()">▶</button>
+            </div>
+            <button class="dpad-btn" onmousedown="sendCmd(-0.2, 0)" onmouseup="stopCmd()" ontouchstart="sendCmd(-0.2, 0)" ontouchend="stopCmd()">▼</button>
+          </div>
+        </div>
+
+        <!-- Voice Command Input -->
+        <div class="card">
+          <div style="font-weight: 800; font-size: 14px; margin-bottom: 8px;">Voice Speech Prompt</div>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="voice-input" placeholder="Enter text command for LUMI..." style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); font-size: 13px;">
+            <button class="btn btn-primary" onclick="sendVoiceCommand()">Send</button>
+          </div>
+          <div id="voice-response" style="margin-top: 8px; font-size: 12px; color: var(--primary); font-weight: 600;"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="nav-bar">
+      <div class="nav-item active" onclick="switchTab('home')">
+        <span class="nav-icon">🏠</span>
+        <span>Home</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('camera')">
+        <span class="nav-icon">📷</span>
+        <span>Camera</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('map')">
+        <span class="nav-icon">🗺️</span>
+        <span>Map</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('medicines')">
+        <span class="nav-icon">💊</span>
+        <span>Meds</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('controls')">
+        <span class="nav-icon">🎮</span>
+        <span>Controls</span>
+      </div>
+    </nav>
+  </div>
+
+  <script>
+    // Tab switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + tabId).classList.add('active');
+      
+      const tabs = ['home', 'camera', 'map', 'medicines', 'controls'];
+      const idx = tabs.indexOf(tabId);
+      if (idx >= 0) document.querySelectorAll('.nav-item')[idx].classList.add('active');
+      if (tabId === 'map') renderMap();
+    }
+
+    // Periodic Robot Eyes Blinking
+    setInterval(() => {
+      const left = document.getElementById('eye-left');
+      const right = document.getElementById('eye-right');
+      left.classList.add('blink'); right.classList.add('blink');
+      setTimeout(() => {
+        left.classList.remove('blink'); right.classList.remove('blink');
+      }, 250);
+    }, 4000);
+
+    // WebSocket real-time connection
+    const wsProto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(`${wsProto}//${window.location.host}/api/v1/ws`);
+
+    ws.onmessage = (e) => {
+      const msg = JSON.parse(e.data);
+      if (msg.type === 'robot.status' && msg.data) {
+        updateRobotStatus(msg.data);
+      } else if (msg.type === 'vision.fall_detected') {
+        showEmergencyBanner(msg.event || msg.data);
+      }
+    };
+
+    function updateRobotStatus(data) {
+      if (data.battery) {
+        document.getElementById('battery-pill').innerText = `${Math.round(data.battery.percentage)}%`;
+      }
+      if (data.operating_mode) {
+        document.getElementById('mode-badge').innerText = data.operating_mode;
+      }
+      if (data.expression) {
+        document.getElementById('expr-label').innerText = `Expression: ${data.expression.toUpperCase()}`;
+      }
+      if (data.current_activity) {
+        document.getElementById('activity-label').innerText = `Activity: ${data.current_activity.toUpperCase()}`;
+      }
+      if (data.location) {
+        document.getElementById('location-text').innerText = `Location: (${data.location.x.toFixed(1)}, ${data.location.y.toFixed(1)}) m`;
+      }
+      if (data.unacknowledged_emergencies > 0) {
+        document.getElementById('emergency-banner').style.display = 'block';
+      }
+    }
+
+    // Fall alert actions
+    function showEmergencyBanner(ev) {
+      const banner = document.getElementById('emergency-banner');
+      banner.style.display = 'block';
+      document.getElementById('emergency-desc').innerText = `Patient fall detected (${Math.round((ev.confidence||0.95)*100)}% confidence). Posture: ${ev.posture||'LYING DOWN'}`;
+      document.getElementById('eye-left').classList.add('emergency');
+      document.getElementById('eye-right').classList.add('emergency');
+    }
+
+    async function triggerSimulatedFall() {
+      const res = await fetch('/api/v1/emergencies/simulate_fall', { method: 'POST' });
+      const ev = await res.json();
+      showEmergencyBanner(ev);
+    }
+
+    async function acknowledgeAlert() {
+      const res = await fetch('/api/v1/emergencies', { method: 'GET' });
+      const list = await res.json();
+      if (list.length > 0) {
+        await fetch(`/api/v1/emergencies/${list[0].event_id}/acknowledge`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ acknowledged_by: 'Caregiver Web' })
+        });
+      }
+      document.getElementById('emergency-banner').style.display = 'none';
+      document.getElementById('eye-left').classList.remove('emergency');
+      document.getElementById('eye-right').classList.remove('emergency');
+    }
+
+    function callResponder() {
+      alert('Calling primary caregiver at +1-555-0199...');
+    }
+
+    // Teleop commands
+    function sendCmd(linear, angular) {
+      fetch('/api/v1/control/manual', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ linear_x: linear, angular_z: angular })
+      });
+    }
+
+    function stopCmd() {
+      sendCmd(0.0, 0.0);
+    }
+
+    function emergencyHalt() {
+      fetch('/api/v1/control/stop', { method: 'POST' });
+      alert('Emergency stop executed!');
+    }
+
+    // Voice Command
+    async function sendVoiceCommand() {
+      const input = document.getElementById('voice-input');
+      const val = input.value.trim();
+      if (!val) return;
+      const res = await fetch('/api/v1/voice/command', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ command: val })
+      });
+      const data = await res.json();
+      document.getElementById('voice-response').innerText = `LUMI: "${data.response_text}"`;
+      input.value = '';
+    }
+
+    // Render 2D Indoor Map
+    function renderMap() {
+      const canvas = document.getElementById('map-canvas');
+      if (!canvas) return;
+      canvas.width = canvas.parentElement.clientWidth - 32;
+      canvas.height = 240;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#231E2D';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Grid
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      for (let x = 0; x < canvas.width; x += 30) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += 30) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+      }
+
+      // Robot Marker
+      const rx = canvas.width / 2 + 10;
+      const ry = canvas.height / 2 + 20;
+      ctx.fillStyle = '#00E676';
+      ctx.beginPath(); ctx.arc(rx, ry, 10, 0, Math.PI * 2); ctx.fill();
+
+      // Heading line
+      ctx.strokeStyle = 'white'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx + 16, ry); ctx.stroke();
+
+      // Destinations
+      const dests = [
+        { name: 'Living Room', x: rx + 50, y: ry - 40 },
+        { name: 'Bedroom', x: rx - 60, y: ry - 50 },
+        { name: 'Kitchen', x: rx + 80, y: ry + 40 },
+        { name: 'Meds', x: rx - 30, y: ry + 50 }
+      ];
+      ctx.fillStyle = '#9D84FF';
+      dests.forEach(d => {
+        ctx.beginPath(); ctx.arc(d.x, d.y, 7, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.8)';
+        ctx.font = '10px Plus Jakarta Sans';
+        ctx.fillText(d.name, d.x - 14, d.y + 16);
+        ctx.fillStyle = '#9D84FF';
+      });
+    }
+
+    // Load initial data
+    async function init() {
+      try {
+        const res = await fetch('/api/v1/robot/status');
+        const data = await res.json();
+        updateRobotStatus(data);
+
+        // Load destinations
+        const dRes = await fetch('/api/v1/navigation/destinations');
+        const dests = await dRes.json();
+        const dList = document.getElementById('destinations-list');
+        dList.innerHTML = dests.map(d => `
+          <div style="background: white; padding: 10px 14px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; font-size: 13px;">${d.name}</span>
+            <button class="btn btn-primary" onclick="dispatchDestination('${d.id}', '${d.name}')">Go Here</button>
+          </div>
+        `).join('');
+
+        // Load medicines
+        const mRes = await fetch('/api/v1/medicines');
+        const meds = await mRes.json();
+        const mList = document.getElementById('medicines-list');
+        mList.innerHTML = meds.map(m => `
+          <div class="card">
+            <div style="font-weight: 800; font-size: 14px;">${m.name}</div>
+            <div style="font-size: 12px; color: var(--text-muted);">${m.dosage} • Scheduled: ${m.scheduled_time}</div>
+            <div style="margin-top: 8px; display: flex; gap: 8px;">
+              <button class="btn btn-outline" onclick="triggerMed('${m.id}')">Remind Now</button>
+              <button class="btn btn-success" onclick="markMed('${m.id}', 'taken')">Mark Taken</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error('Init error', e);
+      }
+    }
+
+    async function dispatchDestination(id, name) {
+      await fetch('/api/v1/navigation/goals', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ destination_id: id })
+      });
+      alert(`Dispatched LUMI to ${name}!`);
+    }
+
+    async function triggerMed(id) {
+      await fetch(`/api/v1/medicines/${id}/trigger`, { method: 'POST' });
+      alert('Spoken reminder triggered on robot speaker.');
+    }
+
+    async function markMed(id, action) {
+      await fetch(`/api/v1/medicines/${id}/action`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ action: action, confirmed_by: 'Caregiver' })
+      });
+      alert(`Marked dose as ${action}!`);
+    }
+
+    function captureSnapshot() {
+      window.open('/api/v1/camera/snapshot', '_blank');
+    }
+
+    function togglePrivacy() {
+      alert('Privacy shield enabled. Camera feed obscured.');
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -144,6 +144,13 @@ def create_app() -> FastAPI:
             "dev_mode": settings.dev_mode,
         }
 
+    # Caregiver Mobile Web App interface
+    @app.get("/app")
+    async def serve_caregiver_app():
+        from fastapi.responses import FileResponse
+        static_index = settings.base_dir / "static" / "index.html"
+        return FileResponse(static_index)
+
     # Real-time WebSocket endpoint: /api/v1/ws
     @app.websocket("/api/v1/ws")
     async def websocket_endpoint(websocket: WebSocket) -> None:

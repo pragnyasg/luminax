@@ -221,7 +221,7 @@ class HomeScreen extends StatelessWidget {
                             color: LumiColors.successContainer,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(Icons.pill, color: LumiColors.success, size: 22),
+                          child: const Icon(Icons.medication, color: LumiColors.success, size: 22),
                         ),
                         const SizedBox(width: 12),
                         Expanded(

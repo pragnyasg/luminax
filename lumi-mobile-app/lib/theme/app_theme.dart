@@ -35,7 +35,7 @@ class AppTheme {
         ),
         iconTheme: IconThemeData(color: LumiColors.primary),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: LumiColors.surfaceContainer,
         elevation: 0.5,
         shape: RoundedRectangleBorder(

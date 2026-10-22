@@ -28,36 +28,14 @@ class PersonTrack {
       bbox: json['bbox'] != null ? List<int>.from(json['bbox'] as List) : null,
     );
   }
-}
 
-class ActivityTimelineItem {
-  final String id;
-  final String timestamp;
-  final String category; // medicine, emergency, navigation, voice, system, presence
-  final String severity; // INFO, WARNING, ALERT, CRITICAL
-  final String title;
-  final String description;
-  final Map<String, dynamic> metadata;
-
-  const ActivityTimelineItem({
-    required this.id,
-    required this.timestamp,
-    required this.category,
-    required this.severity,
-    required this.title,
-    required this.description,
-    this.metadata = const {},
-  });
-
-  factory ActivityTimelineItem.fromJson(Map<String, dynamic> json) {
-    return ActivityTimelineItem(
-      id: json['id'] as String? ?? 'act-0',
-      timestamp: json['timestamp'] as String? ?? DateTime.now().toIso8601String(),
-      category: json['category'] as String? ?? 'system',
-      severity: json['severity'] as String? ?? 'INFO',
-      title: json['title'] as String? ?? '',
-      description: json['description'] as String? ?? '',
-      metadata: json['metadata'] as Map<String, dynamic>? ?? {},
-    );
-  }
+  Map<String, dynamic> toJson() => {
+    'track_id': trackId,
+    'person_name': personName,
+    'confidence': confidence,
+    'posture': posture,
+    'presence_state': presenceState,
+    'last_seen_timestamp': lastSeenTimestamp,
+    'bbox': bbox,
+  };
 }

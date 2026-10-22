@@ -80,6 +80,7 @@ luminax/
 │       ├── robot_hardware/                             # Serial bridge to ESP32 & wheel odometry node
 │       ├── robot_navigation/                           # SLAM Toolbox & Nav2 parameters/launch/maps
 │       ├── robot_perception/                           # OpenCV HOG person detection & webcam publisher
+│       ├── luminax_vision_ros/                         # Deep learning face recognition, 3D pose, fall detection & caregiver notifications
 │       ├── robot_voice/                                # Async offline text-to-speech engine
 │       ├── robot_health/                               # Healthcare medication reminder manager
 │       ├── robot_behaviour/                            # 5-state supervisor Finite State Machine
@@ -178,3 +179,26 @@ For students preparing for oral examination and project reviews, see the dedicat
 ## License
 
 This project is licensed under the [Apache 2.0 License](LICENSE).
+
+
+---
+
+## LUMI Vision & Fall Detection Stack (luminax_vision_ros)
+
+LUMI integrates a state-of-the-art multi-modal edge perception engine for continuous patient safety:
+
+1. **Human Pose Estimation:** 33-point 3D body landmark extraction powered by MediaPipe Tasks (CPU XNNPACK).
+2. **Activity & Posture Classification:** Distinguishes standing, sitting, walking, lying_down, and sudden uncontrolled drops.
+3. **Temporal Fall-Detection State Machine:** Multi-stage deterministic state machine (NORMAL -> POSSIBLE_FALL -> FALL_SUSPECTED -> FALL_CONFIRMED -> ALERT_SENT -> RECOVERED).
+4. **Patient Presence & Disappearance:** Supervised tracking for designated individuals (PRESENT, TEMPORARILY_MISSING, MISSING, CAMERA_ERROR), strictly differentiating camera failure from patient movement.
+5. **Biometric Face Recognition:** On-device YuNet face detection and SFace 128-d cosine recognition matching local data/identities.json.
+6. **Caregiver Notification REST / WebSocket API:** Real-time event broadcasting and status telemetry on http://localhost:8000.
+
+### Running on Raspberry Pi 5 / Ubuntu 24.04:
+`ash
+# Standalone Vision ROS 2 Node:
+ros2 launch luminax_vision_ros lumi_vision.launch.py camera_topic:=/camera/image_raw
+
+# Full Robot Bringup with Deep Learning Vision:
+ros2 launch robot_bringup bringup_full_system.launch.py use_sim:=false use_vision:=true
+`

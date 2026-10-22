@@ -31,7 +31,8 @@ class TestROSStructureAndSyntax(unittest.TestCase):
             'robot_voice',
             'robot_health',
             'robot_behaviour',
-            'robot_bringup'
+            'robot_bringup',
+            'luminax_vision_ros'
         ]
         found_packages = []
 

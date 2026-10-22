@@ -65,6 +65,12 @@ def generate_launch_description():
         description='Launch Nav2 autonomous navigation if true'
     )
 
+    use_vision_arg = DeclareLaunchArgument(
+        'use_vision',
+        default_value='true',
+        description='Launch LUMI Vision deep learning pose, fall, and face recognition node if true'
+    )
+
     use_perception_arg = DeclareLaunchArgument(
         'use_perception',
         default_value='true',
@@ -151,6 +157,18 @@ def generate_launch_description():
     )
 
     # 5. PERCEPTION: Person Detector Node
+    lumi_vision_node = Node(
+        package='luminax_vision_ros',
+        executable='lumi_vision_node',
+        name='lumi_vision_node',
+        output='screen',
+        parameters=[{
+            'camera_topic': '/camera/image_raw',
+            'publish_annotated': True,
+        }],
+        condition=IfCondition(LaunchConfiguration('use_vision'))
+    )
+
     person_detector_node = Node(
         package='robot_perception',
         executable='person_detector_node',
@@ -202,6 +220,7 @@ def generate_launch_description():
         use_sim_time_arg,
         use_slam_arg,
         use_nav2_arg,
+        use_vision_arg,
         use_perception_arg,
         use_voice_arg,
         use_health_arg,
@@ -212,6 +231,7 @@ def generate_launch_description():
         hw_serial_bridge,
         slam_stack,
         nav2_stack,
+        lumi_vision_node,
         person_detector_node,
         voice_node,
         reminder_manager_node,

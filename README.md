@@ -183,6 +183,33 @@ This project is licensed under the [Apache 2.0 License](LICENSE).
 
 ---
 
+
+
+---
+
+## LUMI Voice Assistant & Speech AI Stack (
+obot_voice)
+
+Integrated from the official LUMI Voice Assistant DL architecture, this module provides bidirectional spoken dialogue for the healthcare companion robot:
+
+1. **Speech-to-Text (STT):** OpenAI Whisper via aster-whisper (int8 quantized for Raspberry Pi 5 ARM CPU).
+2. **Conversational AI (LLM):** Local LLM integration via Ollama (phi3:latest, llama3.2:1b, or custom models) with conversational memory and strict healthcare safety boundaries.
+3. **Text-to-Speech (TTS):** Low-latency offline speech synthesis via Piper TTS (en_US-lessac-medium) and multi-platform pyttsx3 fallback.
+4. **Hardware Audio I/O:** Real-time USB microphone capture with Voice Activity Detection (VAD) and speaker playback.
+5. **Emergency Fall Dialogue:** Automatic verbal response when fall detection confirms an incident (/vision/events/emergency), speaking alerts aloud:
+   *"Warning! A fall has been detected for Pragnya. Please stay still, emergency alerts have been transmitted to your caregiver."*
+6. **Medication & Health Prompts:** Speaks scheduled medication reminders and check-in dialogues from 
+obot_health.
+
+### Running Voice Node on Raspberry Pi 5 / Ubuntu 24.04:
+`ash
+# Standalone Voice Assistant Node:
+ros2 launch robot_voice voice.launch.py
+
+# Full Bringup with Vision and Voice:
+ros2 launch robot_bringup bringup_full_system.launch.py use_sim:=false use_vision:=true use_voice:=true
+`
+
 ## LUMI Vision & Fall Detection Stack (luminax_vision_ros)
 
 LUMI integrates a state-of-the-art multi-modal edge perception engine for continuous patient safety:

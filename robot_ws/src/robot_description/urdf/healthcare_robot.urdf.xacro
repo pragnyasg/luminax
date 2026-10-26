@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
-<robot name="healthcare_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="lumi_small_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- ==================================================================== -->
-  <!--                      BAYMAX HEALTHCARE ROBOT URDF                    -->
+  <!--                      LUMI SMALL MOBILE ROBOT URDF                    -->
   <!-- ==================================================================== -->
-  <!-- Educational Notes for Student Oral Defense:                           -->
+  <!-- Notes:                           -->
   <!-- LINK: Represents a rigid physical part of the robot (chassis, wheel). -->
   <!-- JOINT: Defines physical connection and degrees of freedom between    -->
   <!--        parent and child links (fixed, continuous, revolute).          -->
@@ -15,25 +15,27 @@
   <!-- ==================================================================== -->
 
   <!-- ==================== PARAMETERS & DIMENSIONS ==================== -->
-  <!-- Robot Chassis Dimensions (Soft rounded capsule design) -->
-  <xacro:property name="chassis_radius" value="0.18" />   <!-- 36cm diameter body -->
-  <xacro:property name="chassis_height" value="0.40" />   <!-- 40cm body height -->
-  <xacro:property name="chassis_mass"   value="5.00" />   <!-- 5.0 kg total mass -->
+  <!-- Estimated dimensions from photos using the 15 cm ruler as scale. Verify physically. -->
+  <xacro:property name="chassis_length" value="0.26" /> <!-- estimated deck length: 26 cm -->
+  <xacro:property name="chassis_width" value="0.24" />  <!-- estimated deck width: 24 cm -->
+  <xacro:property name="chassis_height" value="0.035" /> <!-- lower plate thickness: 3.5 cm -->
+  <xacro:property name="chassis_mass"   value="1.50" />   <!-- provisional lower plate mass -->
+  <xacro:property name="chassis_radius" value="0.12" />
 
   <!-- Wheel Dimensions (Differential Drive) -->
-  <xacro:property name="wheel_radius"   value="0.04" />   <!-- 8cm diameter wheel -->
-  <xacro:property name="wheel_width"    value="0.02" />   <!-- 2cm wheel thickness -->
-  <xacro:property name="wheel_track"    value="0.32" />   <!-- Distance between wheel centers -->
-  <xacro:property name="wheel_mass"     value="0.25" />   <!-- 250 grams per wheel -->
+  <xacro:property name="wheel_radius"   value="0.06" />   <!-- estimated wheel diameter: 12 cm -->
+  <xacro:property name="wheel_width"    value="0.045" />  <!-- estimated wheel width: 4.5 cm -->
+  <xacro:property name="wheel_track"    value="0.25" />   <!-- estimated distance between wheel centers: 25 cm -->
+  <xacro:property name="wheel_mass"     value="0.30" />   <!-- provisional mass per wheel -->
 
   <!-- Caster Wheel (Rear Support) -->
   <xacro:property name="caster_radius"  value="0.02" />   <!-- 4cm diameter sphere -->
   <xacro:property name="caster_mass"    value="0.10" />   <!-- 100 grams -->
-  <xacro:property name="caster_x_offset" value="-0.12" /> <!-- Positioned rear of chassis -->
+  <xacro:property name="caster_x_offset" value="-0.10" /> <!-- rear support position; verify physical base -->
 
   <!-- LiDAR Sensor -->
-  <xacro:property name="lidar_radius"   value="0.035" />  <!-- 7cm diameter RPLiDAR -->
-  <xacro:property name="lidar_height"   value="0.04" />   <!-- 4cm height -->
+  <xacro:property name="lidar_radius"   value="0.035" />  <!-- approx. 7 cm diameter -->
+  <xacro:property name="lidar_height"   value="0.06" />   <!-- provisional 6 cm scanner assembly height -->
   <xacro:property name="lidar_mass"     value="0.15" />   <!-- 150 grams -->
 
   <!-- Camera Sensor -->
@@ -107,15 +109,15 @@
     <visual>
       <origin xyz="0 0 ${chassis_height/2}" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="${chassis_radius}" length="${chassis_height}"/>
+        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
       </geometry>
       <material name="baymax_white"/>
     </visual>
 
     <visual>
-      <origin xyz="0 0 ${chassis_height * 0.7}" rpy="0 0 0"/>
+      <origin xyz="0 0 0.17" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="${chassis_radius + 0.002}" length="0.02"/>
+        <box size="${chassis_length} ${chassis_width} 0.025"/>
       </geometry>
       <material name="baymax_accent"/>
     </visual>
@@ -123,11 +125,11 @@
     <collision>
       <origin xyz="0 0 ${chassis_height/2}" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="${chassis_radius}" length="${chassis_height}"/>
+        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
       </geometry>
     </collision>
 
-    <xacro:cylinder_inertia m="${chassis_mass}" r="${chassis_radius}" h="${chassis_height}"/>
+    <xacro:box_inertia m="${chassis_mass}" x="${chassis_length}" y="${chassis_width}" z="${chassis_height}"/>
   </link>
 
   <gazebo reference="base_link">
@@ -224,7 +226,15 @@
   <joint name="lidar_joint" type="fixed">
     <parent link="base_link"/>
     <child link="lidar_link"/>
-    <origin xyz="0.08 0 ${chassis_height + lidar_height/2}" rpy="0 0 0"/>
+    <origin xyz="0 0 ${0.20 + lidar_height/2}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Alias laser_frame for RPLiDAR driver and rf2o -->
+  <link name="laser_frame"/>
+  <joint name="laser_frame_alias_joint" type="fixed">
+    <parent link="lidar_link"/>
+    <child link="laser_frame"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
   </joint>
 
   <gazebo reference="lidar_link">
@@ -252,7 +262,7 @@
   <joint name="camera_joint" type="fixed">
     <parent link="base_link"/>
     <child link="camera_link"/>
-    <origin xyz="${chassis_radius + camera_length/2} 0 ${chassis_height * 0.75}" rpy="0 0 0"/>
+    <origin xyz="${chassis_length/2 + camera_length/2} 0 0.22" rpy="0 0 0"/>
   </joint>
 
   <gazebo reference="camera_link">

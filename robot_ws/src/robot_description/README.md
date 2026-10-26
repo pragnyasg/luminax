@@ -27,19 +27,19 @@ robot_description/
 
 ---
 
-## 3. Implemented Robot Links & Joints
-
 | Element | Type | Parent Link | Child Link | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | `base_footprint` | Link | - | - | Ground level 2D reference frame ($Z=0$). |
-| `base_footprint_joint` | Fixed | `base_footprint` | `base_link` | Raises chassis center by wheel radius ($0.04\text{ m}$). |
-| `base_link` | Link | - | - | Main cylindrical chassis body ($R=0.18\text{ m}, H=0.40\text{ m}, M=5.0\text{ kg}$). |
-| `left_wheel_joint` | Continuous | `base_link` | `left_wheel_link` | Left driven wheel rotation joint along Y-axis. |
-| `right_wheel_joint` | Continuous | `base_link` | `right_wheel_link` | Right driven wheel rotation joint along Y-axis. |
-| `caster_wheel_joint` | Fixed | `base_link` | `caster_wheel_link` | Rear passive balancing spherical caster wheel. |
-| `lidar_joint` | Fixed | `base_link` | `lidar_link` | Top front 360-degree LiDAR range sensor location. |
-| `camera_joint` | Fixed | `base_link` | `camera_link` | Front torso RGB camera sensor location. |
-| `camera_optical_joint` | Fixed | `camera_link` | `camera_optical_link` | Standard ROS optical camera frame rotation. |
+| `base_footprint_joint` | Fixed | `base_footprint` | `base_link` | Raises chassis center by wheel radius ($0.0325\text{ m}$). |
+| `base_link` | Link | - | - | Main chassis body with lower black plate, standoffs, and upper white deck. |
+| `front_left_wheel_joint` | Continuous | `base_link` | `front_left_wheel_link` | Front-left driven wheel rotation along Y-axis ($R=32.5\text{ mm}$). |
+| `front_right_wheel_joint` | Continuous | `base_link` | `front_right_wheel_link` | Front-right driven wheel rotation along Y-axis ($R=32.5\text{ mm}$). |
+| `rear_left_wheel_joint` | Continuous | `base_link` | `rear_left_wheel_link` | Rear-left driven wheel rotation along Y-axis ($R=32.5\text{ mm}$). |
+| `rear_right_wheel_joint` | Continuous | `base_link` | `rear_right_wheel_link` | Rear-right driven wheel rotation along Y-axis ($R=32.5\text{ mm}$). |
+| `caster_wheel_joint` | Fixed | `base_link` | `caster_wheel_link` | Rear passive balancing support for simulation stability. |
+| `lidar_joint` | Fixed | `base_link` | `lidar_link` | Slamtec RPLiDAR A1 laser scanner (scan plane at $Z=0.175\text{ m}$). |
+| `camera_joint` | Fixed | `base_link` | `camera_link` | Companion head enclosure RGB camera sensor location ($Z=0.305\text{ m}$). |
+| `camera_optical_joint` | Fixed | `camera_link` | `camera_optical_link` | Standard ROS REP-103 optical camera frame rotation. |
 
 ---
 

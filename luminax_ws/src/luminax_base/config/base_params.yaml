@@ -16,9 +16,9 @@ motor_driver_node:
     # 'pwm_dir'  for Cytron MDD10A / TB6612 (1 PWM + 1 DIR pin per motor)
     driver_mode: "dual_pwm"
 
-    # --- Geometry (MEASURE on the built robot) ---
-    wheel_radius: 0.045        # m   (MEASURE)
-    wheel_separation: 0.375    # m   (MEASURE) wheel-to-wheel contact distance
+    # --- Geometry (MEASURED from physical robot with 15cm scale) ---
+    wheel_radius: 0.0325       # m   (65mm dia TT wheels)
+    wheel_separation: 0.178    # m   (178mm track width)
 
     # --- Speed limits ---
     max_linear_speed: 0.5      # m/s

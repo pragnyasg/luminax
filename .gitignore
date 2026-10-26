@@ -49,3 +49,7 @@ esp32_firmware/build/
 
 # User Local Overrides
 *.user
+
+# Local Runtime Data
+lumi_backend/data/*.db
+lumi_backend/data/snapshots/

@@ -144,6 +144,12 @@ def create_app() -> FastAPI:
             "dev_mode": settings.dev_mode,
         }
 
+    # Mount compiled Flutter mobile app if built
+    flutter_web_dir = settings.base_dir.parent / "lumi-mobile-app" / "build" / "web"
+    if flutter_web_dir.exists():
+        from fastapi.staticfiles import StaticFiles
+        app.mount("/flutter", StaticFiles(directory=str(flutter_web_dir), html=True), name="flutter_app")
+
     # Caregiver Mobile Web App interface
     @app.get("/app")
     async def serve_caregiver_app():
